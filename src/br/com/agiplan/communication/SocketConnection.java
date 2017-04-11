@@ -8,18 +8,14 @@ import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author João Paulo Cruz
- */
 public class SocketConnection {
 
     private final Socket socket;
     private final String ipAddress;
     private final Server server;
-    public InputStream input;
-    public OutputStream output;
-    private Thread ConnectionDataReader;
+    private InputStream input;
+    private OutputStream output;
+    private Thread connectionDataReader;
 
     public SocketConnection(Socket socket, Server server) {
         this.socket = socket;
@@ -27,12 +23,8 @@ public class SocketConnection {
         this.server = server;
             
         try {
-//            if (socket.isConnected()) {
-//                socket.setSoTimeout(1000);
-//            }
-            
-            socket.setReceiveBufferSize(server.getReadBufferSize());
-            socket.setSendBufferSize(server.getReadBufferSize());
+            socket.setReceiveBufferSize(server.getBufferSize());
+            socket.setSendBufferSize(server.getBufferSize());
         } catch (SocketException ex) {
             close();
             Logger.getLogger(SocketConnection.class.getName()).log(Level.SEVERE, null, ex);
@@ -46,12 +38,16 @@ public class SocketConnection {
         return ipAddress;
     }
     
-    public Server getServer() {
-        return server;
-    }
+    public InputStream getInput() {
+		return input;
+	}
     
-    public Socket getSocket() {
-        return socket;
+    public OutputStream getOutput() {
+		return output;
+	}
+
+    public boolean isConnected() {
+        return socket.isConnected();
     }
     
     public void close() {
@@ -79,7 +75,11 @@ public class SocketConnection {
             return;
         }
 
-        ConnectionDataReader = new Thread(new ConnectionDataReader(this));
-        ConnectionDataReader.start();
+        connectionDataReader = new Thread(new ConnectionDataReader(this, server.getBufferSize()));
+        connectionDataReader.start();
+    }
+    
+    public synchronized String sendDataResponse(String dataResponse) {
+		return "Response : "+dataResponse;
     }
 }

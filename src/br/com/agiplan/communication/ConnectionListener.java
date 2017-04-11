@@ -5,10 +5,6 @@ import java.net.ServerSocket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author João Paulo Cruz
- */
 public class ConnectionListener implements Runnable {
 
     private final ServerSocket serverSocket;
@@ -23,9 +19,9 @@ public class ConnectionListener implements Runnable {
     public void run() {
         while(server.isActive()) {
             try {
-                SocketConnection client = new SocketConnection(serverSocket.accept(), server);
-                if (server.getConnections().size() > server.getMaxConnections()) {
-                    client.close();
+                SocketConnection connection = new SocketConnection(serverSocket.accept(), server);
+                if (server.getNumberOfConnections() > server.getMaxConnections()) {
+                    connection.close();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(ConnectionListener.class.getName()).log(Level.SEVERE, null, ex);

@@ -12,13 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author João Paulo Cruz
- */
 public class Server {
 
-    private final ThreadPoolExecutor threadPool;
     private final int port;
     private ServerSocket serverSocket;
     private Thread thread;
@@ -26,37 +21,34 @@ public class Server {
     private boolean active;
     private final ConcurrentHashMap<String, SocketConnection> connections;
     private final int maxConnections;
-    private final int readBufferSize;
+    private final int bufferSize;
     
     /**
      * Constructs a new Server.
      *
-     * @param ipAddress is the listener's IP address.
-     * @param port is the listener's tcp port.
-     * @param corePoolSize is the number of threads to keep in the pool, even if they are idle.
-     * @param maxPoolSize is the maximum number of threads to allow in the pool.
-     * @param maxConnections is the listener's maximum allowed connections.
-     * @param readBufferSize is the read buffer size for each connections in bytes.
+     * @param ipAddress is the ServerSocket IP address.
+     * @param port is ServerSocket port.
+     * @param maxConnections is the Server maximum allowed connections.
+     * @param bufferSize is the buffer size for each connections in bytes.
      */
-    public Server(InetAddress ipAddress, int port, int corePoolSize, int maxPoolSize, int maxConnections, int readBufferSize) {
-        this.threadPool = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 10L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10000, true));
+    public Server(InetAddress ipAddress, int port, int maxConnections, int bufferSize) {
         this.ipAddress = ipAddress;
         this.port = port;
         this.connections = new ConcurrentHashMap<>();
         this.maxConnections = maxConnections;
-        this.readBufferSize = readBufferSize;
+        this.bufferSize = bufferSize;
     }
     
-    public ConcurrentHashMap<String, SocketConnection> getConnections() {
-        return connections;
+    public int getNumberOfConnections() {
+        return connections.size();
     }
     
     public int getMaxConnections() {
         return maxConnections;
     }
     
-    public int getReadBufferSize() {
-        return readBufferSize;
+    public int getBufferSize() {
+        return bufferSize;
     }
     
     public void start() {
@@ -64,7 +56,6 @@ public class Server {
         
         try {
             serverSocket = new ServerSocket(port, 100, ipAddress);
-//            serverSocket.setSoTimeout(1000);
             
             active = true;
         } catch (IOException ex) {
@@ -80,17 +71,19 @@ public class Server {
         try {
             active = false;
 
-            thread.interrupt();
+            if (thread != null) {
+            	thread.interrupt();
+            }
             
-            for (Enumeration e = connections.keys(); e.hasMoreElements();) {
+            for (Enumeration<String> e = connections.keys(); e.hasMoreElements();) {
                 SocketConnection connection = (SocketConnection) connections.get(e.nextElement());
                 connection.close();
             }
             
-            serverSocket.close();
+            if (serverSocket != null) {
+            	serverSocket.close();
+            }
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -103,6 +96,7 @@ public class Server {
         if (!connections.contains(connection.getIpAddress()))
         {
             connections.put(connection.getIpAddress(), connection);
+            System.out.println(connection.getIpAddress() + " connected!");
         }
     }
     
@@ -110,6 +104,7 @@ public class Server {
         if (connections.containsKey(ipAddress))
         {
             connections.remove(ipAddress);
+            System.out.println(ipAddress + " disconnected!");
         }
     }
 }
