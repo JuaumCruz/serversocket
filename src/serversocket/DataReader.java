@@ -31,7 +31,6 @@ public class DataReader implements Runnable {
                     String dataReceived = new String(dataBuffer, 0, bytesRead);
                     System.out.println("Data received: " + dataReceived);
                     System.out.println("Bytes received: " + bytesRead);
-                    Thread.sleep(1000);
                     connection.processData(dataReceived);
                  }
                 else
@@ -40,7 +39,7 @@ public class DataReader implements Runnable {
                 }
             } catch (SocketException ex) {
             	connection.close();
-            } catch (IOException | InterruptedException ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(DataReader.class.getName()).log(Level.SEVERE, null, ex);
             } 
         }

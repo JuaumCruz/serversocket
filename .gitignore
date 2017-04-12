@@ -13,3 +13,6 @@ hs_err_pid*
 nbproject/
 bin/
 build/
+
+.project
+.classpath

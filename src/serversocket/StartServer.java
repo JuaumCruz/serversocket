@@ -9,7 +9,7 @@ public class StartServer {
 	private final static String ipAddress = "127.0.0.1";
 	private final static int portNumber = 5000;
 	private final static int maxConnections = 10;
-	private final static int bufferSize = 4096;
+	private final static int bufferSize = 65535;
 	
     /**
      * @param args the command line arguments
