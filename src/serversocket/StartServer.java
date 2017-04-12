@@ -1,4 +1,4 @@
-package br.com.agiplan.communication;
+package serversocket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -9,7 +9,7 @@ public class StartServer {
 	private final static String ipAddress = "127.0.0.1";
 	private final static int portNumber = 5000;
 	private final static int maxConnections = 10;
-	private final static int bufferSize = 8192;
+	private final static int bufferSize = 4096;
 	
     /**
      * @param args the command line arguments

@@ -1,4 +1,4 @@
-package br.com.agiplan.communication;
+package serversocket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,12 +7,12 @@ import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ConnectionDataReader implements Runnable {
+public class DataReader implements Runnable {
 
-    private final SocketConnection connection;
+    private final Connection connection;
     private final byte[] dataBuffer;
 
-    public ConnectionDataReader(SocketConnection connection, int bufferSize) {
+    public DataReader(Connection connection, int bufferSize) {
         this.connection = connection;
         this.dataBuffer = new byte[bufferSize];
     }
@@ -21,10 +21,8 @@ public class ConnectionDataReader implements Runnable {
     public void run() {
         int bytesRead;
         InputStream input = connection.getInput();
-        OutputStream output = connection.getOutput();
         
         while(connection.isConnected()) {
-           
             try {
                 bytesRead = input.read(dataBuffer);
                 
@@ -33,19 +31,17 @@ public class ConnectionDataReader implements Runnable {
                     String dataReceived = new String(dataBuffer, 0, bytesRead);
                     System.out.println("Data received: " + dataReceived);
                     System.out.println("Bytes received: " + bytesRead);
-                    
-                    String dataResponse = connection.sendDataResponse(dataReceived);
-                    
-                    output.write(dataResponse.getBytes(), 0, dataResponse.length());
-                }
+                    Thread.sleep(1000);
+                    connection.processData(dataReceived);
+                 }
                 else
                 {
                     connection.close();
                 }
             } catch (SocketException ex) {
             	connection.close();
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectionDataReader.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | InterruptedException ex) {
+                Logger.getLogger(DataReader.class.getName()).log(Level.SEVERE, null, ex);
             } 
         }
     }

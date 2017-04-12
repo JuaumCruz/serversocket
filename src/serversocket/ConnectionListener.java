@@ -1,4 +1,4 @@
-package br.com.agiplan.communication;
+package serversocket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -19,7 +19,7 @@ public class ConnectionListener implements Runnable {
     public void run() {
         while(server.isActive()) {
             try {
-                SocketConnection connection = new SocketConnection(serverSocket.accept(), server);
+                Connection connection = new Connection(serverSocket.accept(), server);
                 if (server.getNumberOfConnections() > server.getMaxConnections()) {
                     connection.close();
                 }

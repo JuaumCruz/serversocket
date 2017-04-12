@@ -1,4 +1,4 @@
-package br.com.agiplan.communication;
+package serversocket;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -16,10 +16,10 @@ public class Server {
 
     private final int port;
     private ServerSocket serverSocket;
-    private Thread thread;
+    private Thread connectionListener;
     private final InetAddress ipAddress;
     private boolean active;
-    private final ConcurrentHashMap<String, SocketConnection> connections;
+    private final ConcurrentHashMap<String, Connection> connections;
     private final int maxConnections;
     private final int bufferSize;
     
@@ -63,20 +63,20 @@ public class Server {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        thread = new Thread(new ConnectionListener(serverSocket, this));
-        thread.start();
+        connectionListener = new Thread(new ConnectionListener(serverSocket, this));
+        connectionListener.start();
     }
     
     public void stop() {
         try {
             active = false;
 
-            if (thread != null) {
-            	thread.interrupt();
+            if (connectionListener != null) {
+            	connectionListener.interrupt();
             }
             
             for (Enumeration<String> e = connections.keys(); e.hasMoreElements();) {
-                SocketConnection connection = (SocketConnection) connections.get(e.nextElement());
+                Connection connection = (Connection) connections.get(e.nextElement());
                 connection.close();
             }
             
@@ -92,7 +92,7 @@ public class Server {
         return active;
     }
     
-    public synchronized void AddConnection(SocketConnection connection) {
+    public synchronized void AddConnection(Connection connection) {
         if (!connections.contains(connection.getIpAddress()))
         {
             connections.put(connection.getIpAddress(), connection);
